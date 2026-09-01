@@ -1,0 +1,4 @@
+# 데이터 전처리(scripts/preprocess.py)에만 필요하다.
+# 웹 서버 실행에는 flask 하나면 된다.
+-r requirements.txt
+pandas
