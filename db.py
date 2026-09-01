@@ -15,6 +15,20 @@ from scoring import CATEGORIES
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(ROOT, "data", "place.db")
 
+# ── Vercel 등 읽기 전용 환경 대응 ───────────────────────────
+# 배포된 파일은 수정할 수 없다. 그대로 쓰려고 하면
+# "attempt to write a readonly database" 오류가 난다.
+# 쓸 수 있는 곳은 /tmp 하나뿐이라, 처음 뜰 때 그리로 복사해서 쓴다.
+# (주의: /tmp는 서버가 살아 있는 동안만 유지된다 — 기록이 영구 저장되지 않는다)
+# 노트북에서 python app.py 로 돌릴 때는 이 블록을 건너뛴다.
+if os.environ.get("VERCEL"):
+    import shutil
+    _writable = os.path.join("/tmp", os.path.basename(DB_PATH))
+    if not os.path.exists(_writable):
+        shutil.copyfile(DB_PATH, _writable)
+    DB_PATH = _writable
+
+
 # 같은 장소를 다시 열어도 이 시간 안에는 열람 기록을 새로 남기지 않는다(§5.4).
 # 새로고침 몇 번으로 한 카테고리 관심도가 치솟는 사고를 막는다.
 VIEW_DEDUP_MINUTES = 10
