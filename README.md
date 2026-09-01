@@ -97,34 +97,42 @@ python scripts/make_snapshots.py
 
 ## Vercel로 인터넷에 띄우기
 
+설정 파일이 필요 없다. Vercel이 `requirements.txt`의 flask를 보고 Flask 앱으로 인식하고,
+루트 `app.py`의 `app` 변수를 찾아서 그대로 띄운다.
+
+[vercel.com/new](https://vercel.com/new)에서 `Gongju-Information-Highschool/tour3` 저장소를
+Import 하기만 하면 된다.
+
+> **Framework Preset은 반드시 `Flask`여야 한다.** `Other`로 두면 Vercel이 무엇을
+> 실행할지 몰라서 모든 주소가 404가 난다.
+> (Settings → Build and Deployment → Framework Settings)
+
+CLI로 할 수도 있다.
+
 ```bash
 npm i -g vercel
 vercel login
 vercel --prod
 ```
 
-또는 [vercel.com/new](https://vercel.com/new)에서 `Gongju-Information-Highschool/tour3` 저장소를
-그대로 Import 하면 된다. 설정은 건드릴 것이 없다 (`vercel.json`이 이미 있다).
-
-### 어떻게 돌아가나
-
-| 파일 | 하는 일 |
-|---|---|
-| `api/index.py` | Vercel이 부르는 진입점. DB를 `/tmp`로 복사하고 `app`을 내보낸다 |
-| `vercel.json` | 모든 주소(`/`, `/stats` …)를 `api/index.py`로 넘긴다 |
-| `requirements.txt` | 서버 실행에 필요한 것만 (flask). pandas는 `requirements-dev.txt`로 옮겼다 |
-
-전처리 스크립트를 돌릴 때는 `pip install -r requirements-dev.txt`.
-
 ### 알아 둘 것 — 기록이 남지 않는다
 
 Vercel에 올라간 파일은 **읽기 전용**이다. `data/place.db`에 직접 쓸 수 없어서,
-서버가 뜰 때마다 DB를 `/tmp`로 복사해서 쓴다.
+`db.py`가 `VERCEL` 환경변수를 보고 DB를 `/tmp`로 복사해서 쓴다.
+노트북에서 `python app.py`로 돌릴 때는 이 동작을 건너뛰므로 영향이 없다.
 
-그래서 사용자가 남긴 기록은 **잠시 뒤 사라지고, 접속자마다 다를 수도 있다.**
+`/tmp`는 서버 인스턴스가 살아 있는 동안만 유지된다. 그래서 사용자가 남긴 기록은
+**잠시 뒤 사라지고, 접속자마다 다를 수도 있다.**
 관광지 목록·추천 알고리즘 같은 읽기 기능은 전부 정상 동작한다.
+
 발표·시연용으로는 충분하지만, 수업 중 모은 데이터를 계속 쌓으려면 아래 중 하나가 필요하다.
 
 - **노트북에서 `python app.py`로 실행** — 원래 방식. 기록이 그대로 남는다 (권장)
 - **외부 DB로 교체** — [Turso](https://turso.tech)(SQLite 호환) 또는 Vercel Postgres.
   `db.py`의 연결 부분만 고치면 된다
+
+### 참고
+
+- 전처리 스크립트(`scripts/preprocess.py`)는 pandas가 필요하다: `pip install -r requirements-dev.txt`
+- `static/`은 Flask가 직접 서빙한다. Vercel은 `public/`에 두어 CDN을 태우기를 권하지만,
+  수업용 규모에서는 차이가 없어 원래 구조를 유지했다
