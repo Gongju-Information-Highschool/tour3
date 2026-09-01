@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% import "_svgmap.html" as svgmap with context %}
+{% block title %}동선 · 맵으로 공주{% endblock %}
+
+{% block body %}
+
+{% if partner_error %}
+  <div class="card" style="background:#fdecea">
+    <b>{{ partner_error }}</b> 는 없는 코드입니다 (자기 코드도 넣을 수 없습니다).
+    내 찜만으로 동선을 짰습니다.
+  </div>
+{% elif partner_id %}
+  <div class="card">
+    확장 3 — <b>{{ partner_id }}번</b> 과 찜을 합쳐 {{ places|length }}곳으로 동선을 짰습니다.
+  </div>
+{% endif %}
+
+{% if not plan %}
+  <div class="card">
+    <h2>동선을 만들 수 없습니다</h2>
+    <p>찜한 곳이 {{ places|length }}곳입니다. <b>두 곳 이상</b> 찜해야 순서를 정할 수 있습니다.</p>
+    <p><a href="{{ url_for('home') }}">지도로 돌아가기</a></p>
+  </div>
+{% else %}
+
+  {% if plan.has_car %}
+    <div class="card" style="background:#fdecea">
+      <b>이 동선은 걸어서 다닐 수 없습니다.</b>
+      3km가 넘는 구간이 있어 그 구간은 차로 이동하는 시간으로 계산했습니다.
+    </div>
+  {% endif %}
+
+  <div class="split">
+    <div class="map-side">
+      {{ svgmap.numbered(svg_points) }}
+    </div>
+
+    <div class="rank-side">
+      <div class="card">
+        <h2>방문 순서</h2>
+        <p class="note">가장 북쪽에서 출발해, 매번 가장 가까운 곳으로 옮겨 갑니다.</p>
+        <ol class="rank">
+          {% for p in plan.order %}
+            <li>
+              <span class="no">{{ loop.index }}</span>
+              <a class="nm" href="{{ url_for('panel', place_id=p.id) }}">{{ p.name }}</a>
+              <span class="sc">{{ p.category }}</span>
+            </li>
+          {% endfor %}
+        </ol>
+      </div>
+
+      <div class="card">
+        <h2>구간별 이동</h2>
+        <table>
+          {% for leg in plan.legs %}
+            <tr>
+              <td>{{ leg.from }} → {{ leg.to }}</td>
+              <td class="num">{{ leg.km }}km</td>
+              <td class="num">
+                <span class="badge {{ 'walk' if leg.mode == '도보' else 'car' }}">
+                  {{ leg.mode }} {{ leg.minutes }}분
+                </span>
+              </td>
+            </tr>
+          {% endfor %}
+          <tr>
+            <th>합계</th>
+            <th class="num">{{ plan.total_km }}km</th>
+            <th class="num">{{ plan.total_min }}분</th>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  {# ── 탐욕 알고리즘의 한계를 숨기지 않는다 (§5.6 ④) ────────────── #}
+  <div class="card">
+    <h2>이 순서가 최선일까?</h2>
+    <p>
+      이 프로그램은 <b>매번 가장 가까운 곳</b>을 고르는 방법(최근접 이웃, 탐욕 알고리즘)을 씁니다.
+      계산이 빠르고 결과도 그럴듯하지만 <b>가장 짧은 순서라는 보장은 없습니다.</b>
+      마지막에 멀리 떨어진 한 곳만 남아 크게 되돌아가는 일이 실제로 생깁니다.
+    </p>
+    <p class="note">
+      모든 순서를 다 따져 보면 최선을 찾을 수 있습니다. 하지만 장소가 10곳이면
+      출발점을 정해 놓아도 나머지를 늘어놓는 방법이 9! = 362,880가지입니다.
+      "적당히 좋은 답을 빨리"가 이 방법의 목적입니다.
+    </p>
+  </div>
+
+{% endif %}
+
+{% endblock %}

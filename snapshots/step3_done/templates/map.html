@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% import "_svgmap.html" as svgmap with context %}
+
+{% block head %}
+  {% if MAP_MODE == 'leaflet' %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='leaflet/leaflet.css') }}">
+  {% endif %}
+{% endblock %}
+
+{% block body %}
+
+{# ── 카테고리 필터 칩 6개 ────────────────────────────────────── #}
+<div class="card">
+  <div class="chips">
+    <a class="chip {{ 'on' if not category }}"
+       href="{{ url_for('home', origin=origin.id if origin) }}">전체 <span class="n">{{ all_places|length }}</span></a>
+    {% for cat in CATEGORIES %}
+      <a class="chip {{ 'on' if category == cat }} {{ 'empty' if counts[cat] == 0 }}"
+         href="{{ url_for('home', cat=cat, origin=origin.id if origin) }}">
+        {{ cat }} <span class="n">{{ counts[cat] }}</span>
+      </a>
+    {% endfor %}
+  </div>
+</div>
+
+{# ── 기준점 + 가중치 (폼 제출만 쓴다. JS 없음 — §6.3) ─────────── #}
+<div class="card">
+  <form class="inline" method="get" action="{{ url_for('home') }}">
+    <input type="hidden" name="cat" value="{{ category }}">
+
+    <label>거리 기준점</label>
+    <select name="origin">
+      {% for p in all_places %}
+        <option value="{{ p.id }}" {{ 'selected' if origin and p.id == origin.id }}>{{ p.name }}</option>
+      {% endfor %}
+    </select>
+
+    <label>별점 {{ '%.1f'|format(weights[0]) }}</label>
+    <input type="range" name="w_star" min="0" max="1" step="0.1" value="{{ weights[0] }}">
+    <label>거리 {{ '%.1f'|format(weights[1]) }}</label>
+    <input type="range" name="w_dist" min="0" max="1" step="0.1" value="{{ weights[1] }}">
+    <label>취향 {{ '%.1f'|format(weights[2]) }}</label>
+    <input type="range" name="w_pref" min="0" max="1" step="0.1" value="{{ weights[2] }}">
+
+    <button>이 가중치로 다시 줄 세우기</button>
+  </form>
+  <p class="note">
+    가중치 합이 1이 아니어도 됩니다 — 합으로 나눠서 알아서 맞춥니다.
+    {% if log_count < 5 %}
+      · 아직 클릭 기록이 {{ log_count }}건이라 <b>취향은 반영되지 않았습니다</b>(전부 0.5 중립).
+      장소를 몇 개 열어 보고 찜해 보세요.
+    {% endif %}
+  </p>
+</div>
+
+{# ── 심화 설정 (확장 과제 §13) — 전부 기본값 꺼짐 ──────────────── #}
+<div class="card">
+  <h2>심화 설정 <span class="note">— 빠른 조·심화반용. 아무것도 켜지 않으면 기본 과제와 똑같습니다</span></h2>
+  <div class="chips">
+    <a class="chip {{ 'on' if ext.use_blog }}"
+       href="{{ url_for('home', cat=category, origin=origin.id if origin,
+                        heat='1' if ext.heat, use_blog=none if ext.use_blog else '1') }}">
+      확장 2 · 블로그리뷰도 반영
+    </a>
+    <a class="chip {{ 'on' if ext.heat }}"
+       href="{{ url_for('home', cat=category, origin=origin.id if origin,
+                        use_blog='1' if ext.use_blog, heat=none if ext.heat else '1') }}">
+      확장 4 · 히트맵
+    </a>
+  </div>
+  {% if ext.use_blog %}
+    <p class="note">보정 별점의 v를 <b>방문자리뷰 + 0.3 × 블로그리뷰</b>로 바꿔 계산했습니다.</p>
+  {% endif %}
+  {% if ext.heat %}
+    <p class="note">마커 크기가 <b>점수</b>가 아니라 <b>사람들이 누른 횟수</b>입니다.
+      아직 기록이 적으면 대부분 작게 보입니다.</p>
+  {% endif %}
+</div>
+
+<div class="split">
+  {# ── 지도 (또는 위치 관계 그림) ──────────────────────────── #}
+  <div class="map-side">
+    {% if MAP_MODE == 'leaflet' %}
+      <div id="map"></div>
+      {{ svgmap.legend(counts) }}
+
+      {# ═══════════════════════════════════════════════════════════
+         ★ 이 프로젝트에서 JavaScript는 아래 블록 하나가 전부다 (§6.3)
+
+           ① 지도를 띄운다
+           ② 서버가 심어 준 places JSON으로 마커를 찍는다
+           ③ 마커를 누르면 /panel/<id> 로 이동한다
+
+         팝업·애니메이션·AJAX는 쓰지 않는다. 찜·필터·가중치·동선은
+         전부 파이썬이 처리한다. "JS는 지도에만, 로직은 파이썬에만."
+         ═══════════════════════════════════════════════════════════ #}
+      <script src="{{ url_for('static', filename='leaflet/leaflet.js') }}"></script>
+      <script>
+        // 서버(app.py)가 Jinja2로 심어 준 장소 목록
+        var places = {{ places_json|tojson }};
+
+        // 공주 시내를 가운데 두고 지도를 연다
+        var map = L.map('map').setView([36.4632, 127.1260], 11);
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                    { maxZoom: 18, attribution: '© OpenStreetMap' }).addTo(map);
+
+        var css = getComputedStyle(document.documentElement);
+        var radius = { big: 11, mid: 8, small: 5 };
+
+        places.forEach(function (p) {
+          L.circleMarker([p.lat, p.lon], {
+            radius: radius[p.size],
+            color: '#ffffff',
+            weight: 1,
+            fillColor: css.getPropertyValue('--c-' + p.category).trim(),
+            fillOpacity: 0.85
+          }).addTo(map).on('click', function () {
+            location.href = '/panel/' + p.id;      // 이동만 한다
+          });
+        });
+      </script>
+    {% else %}
+      {{ svgmap.scatter(svg_points, origin.id if origin) }}
+      {{ svgmap.legend(counts) }}
+    {% endif %}
+  </div>
+
+  {# ── 랭킹 목록 ──────────────────────────────────────────── #}
+  <div class="rank-side">
+    <div class="card">
+      <h2>{{ category or '전체' }} {{ places|length }}곳</h2>
+      <p class="note">
+        기준점 <b>{{ origin.name if origin }}</b> 에서 가까울수록 거리 점수가 높습니다.
+      </p>
+      <ol class="rank">
+        {% for p in places %}
+          <li>
+            <span class="no">{{ p.rank }}</span>
+            {% if 'panel' in endpoints %}
+              <a class="nm" href="{{ url_for('panel', place_id=p.id) }}">
+                {{ p.name }}{% if p.id in favorites %} ♥{% endif %}</a>
+            {% else %}
+              <span class="nm">{{ p.name }}</span>
+            {% endif %}
+            <span class="sc">
+              {% if ext.heat %}{{ p.heat }}회 · {% endif %}
+              {{ '%.3f'|format(p.final) }}
+              {%- if p.km is not none %} · {{ '%.1f'|format(p.km) }}km{% endif %}
+            </span>
+          </li>
+        {% endfor %}
+      </ol>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

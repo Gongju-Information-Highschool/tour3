@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block title %}보정 전/후 · 맵으로 공주{% endblock %}
+
+{% block body %}
+
+{# ═══════════════════════════════════════════════════════════════
+   이 화면이 수업 데모의 클라이맥스다.
+   "리뷰 2개짜리 5.0점과 리뷰 312개짜리 4.4점, 누가 진짜인가"에 대한 답이
+   표 하나로 눈앞에 나온다.
+   ═══════════════════════════════════════════════════════════════ #}
+
+<div class="card">
+  <h2>보정 전 랭킹 vs 보정 후 랭킹</h2>
+  <p class="note">
+    별점이 있는 {{ compare|length }}곳만 비교합니다 —
+    별점이 없는 곳은 '보정 전 순위'가 아예 없기 때문입니다.<br>
+    보정 별점 = (v × R + {{ meta.m_review|int }} × {{ meta.c_mean }}) ÷ (v + {{ meta.m_review|int }})
+  </p>
+
+  <p>
+    <span class="big-num">{{ flips|length }}곳</span>
+    의 순위가 <b>3계단 이상</b> 움직였습니다.
+    {% if biggest %}
+      가장 크게 바뀐 곳은 <b>{{ biggest.name }}</b>
+      ({{ biggest.rank_before }}위 → {{ biggest.rank_after }}위,
+      별점 {{ '%.1f'|format(biggest.star) }} · 리뷰 {{ '{:,}'.format(biggest.visitor_rev) }}개)
+      입니다.
+    {% endif %}
+  </p>
+
+  <table>
+    <tr>
+      <th class="num">전</th><th class="num">후</th><th class="num">변동</th>
+      <th>장소</th>
+      <th class="num">별점</th><th class="num">리뷰</th>
+      <th class="num">보정 별점</th><th class="num">0~1로 편 값</th>
+    </tr>
+    {% for r in compare %}
+      <tr class="{{ 'flip' if r.delta|abs >= 3 }}">
+        <td class="num">{{ r.rank_before }}</td>
+        <td class="num">{{ r.rank_after }}</td>
+        <td class="num">
+          {% if r.delta > 0 %}<span class="up">▲{{ r.delta }}</span>
+          {% elif r.delta < 0 %}<span class="down">▼{{ -r.delta }}</span>
+          {% else %}·{% endif %}
+        </td>
+        <td><a href="{{ url_for('panel', place_id=r.id) }}">{{ r.name }}</a></td>
+        <td class="num">{{ '%.1f'|format(r.star) }}</td>
+        <td class="num">{{ '{:,}'.format(r.visitor_rev) }}</td>
+        <td class="num">{{ '%.3f'|format(r.adj_star) }}</td>
+        <td class="num">{{ '%.3f'|format(r.s_star) }}</td>
+      </tr>
+    {% endfor %}
+  </table>
+
+  <p class="note" style="margin-top:12px">
+    맨 오른쪽 칸이 <b>정규화</b>한 값입니다. 보정 별점은 전부 3.6~4.8 사이에 뭉쳐 있어서
+    그대로 쓰면 순위에 거의 영향을 주지 못합니다. 그래서 최하위를 0, 최상위를 1로 폈습니다.
+    대신 <b>절대 평가가 상대 평가로 바뀝니다</b> — 꼴찌는 무조건 0점이 됩니다. 이게 정규화의 대가입니다.
+  </p>
+</div>
+
+{# ── 손계산 예제 ─────────────────────────────────────────────── #}
+<div class="card">
+  <h2>손으로 계산해 보기</h2>
+  <table>
+    <tr><th></th><th class="num">v (리뷰)</th><th class="num">R (별점)</th><th class="num">보정 별점</th></tr>
+    {% for key, ex in params.hand_calc.items() %}
+      <tr>
+        <td>{{ ex.name }}</td>
+        <td class="num">{{ ex.v }}</td>
+        <td class="num">{{ ex.R }}</td>
+        <td class="num"><b>{{ ex.expect }}</b></td>
+      </tr>
+    {% endfor %}
+  </table>
+  <p class="note">
+    리뷰가 적은 별점은 전체 평균({{ meta.c_mean }}) 쪽으로 끌려옵니다.
+    그래서 리뷰 2개짜리 5.0점이 리뷰 312개짜리 4.4점에게 집니다.
+  </p>
+</div>
+
+{# ── 카테고리별 리뷰 수 분포 (CSS 막대) ──────────────────────── #}
+<div class="card">
+  <h2>카테고리별 리뷰 수</h2>
+  <table>
+    {% for cat in CATEGORIES %}
+      {% set d = dist.get(cat) %}
+      <tr>
+        <td style="width:90px">{{ cat }}</td>
+        <td style="width:60px" class="num">{{ d.n if d else 0 }}곳</td>
+        <td>
+          <div class="bar">
+            <span style="width: {{ (100 * d.visitor / max_visitor)|round(1) if d else 0 }}%"></span>
+          </div>
+        </td>
+        <td class="num" style="width:90px">{{ '{:,}'.format(d.visitor) if d else 0 }}</td>
+      </tr>
+    {% endfor %}
+  </table>
+</div>
+
+{# ── 내 행동 기록 ────────────────────────────────────────────── #}
+<div class="card">
+  <h2>내 클릭 기록과 취향</h2>
+  <p>
+    열람 {{ summary.get('view', 0) }}회 · 찜 {{ summary.get('fav', 0) }}회 · 찜 취소 {{ summary.get('unfav', 0) }}회
+    → 신호 총량 <b>{{ log_count }}</b>
+    {% if log_count < 5 %}
+      <br><span class="note">5건이 안 되어 취향은 아직 반영되지 않습니다(전부 0.5 중립).</span>
+    {% endif %}
+  </p>
+  <table>
+    {% for cat in CATEGORIES %}
+      <tr>
+        <td style="width:90px">{{ cat }}</td>
+        <td>
+          <div class="bar">
+            <span style="width: {{ (100 * interests[cat])|round(1) }}%"></span>
+          </div>
+        </td>
+        <td class="num" style="width:70px">{{ '%.3f'|format(interests[cat]) }}</td>
+      </tr>
+    {% endfor %}
+  </table>
+  <p class="note">
+    관심도 = (열람 수 × 1 + 현재 찜 수 × 3) ÷ 전체.
+    찜은 열람보다 3배 강한 신호로 봅니다. 6개가 똑같으면 0.167이 됩니다.
+  </p>
+</div>
+
+{% endblock %}

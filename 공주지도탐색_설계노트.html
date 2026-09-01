@@ -1,0 +1,900 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>맵으로 공주 설계 노트</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@300;400;500;600&display=swap">
+</head>
+<body>
+<style>
+  :root {
+    --paper:   #F7F6F3;
+    --surface: #FFFFFF;
+    --ink:     #23201C;
+    --muted:   #746E64;
+    --line:    #DDD8D0;
+    --rule:    #C9C2B7;
+    --accent:  #1F6F5C;
+    --accent-soft: #E4EFEA;
+
+    --pass:    #1F6F5C;
+    --pending: #9A6A08;
+    --gone:    #B23A2E;
+
+    --c1: #8B5E34;  /* 역사문화 */
+    --c2: #2F8F4E;  /* 자연 */
+    --c3: #C67A1E;  /* 체험 */
+    --c4: #C0392B;  /* 먹거리 */
+    --c5: #8E44AD;  /* 카페감성 */
+    --c6: #2B6CB0;  /* 휴식 */
+
+    --measure: 34rem;
+    --wide: 60rem;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:   #191814;
+      --surface: #211F1A;
+      --ink:     #EAE6DE;
+      --muted:   #9A9287;
+      --line:    #34302A;
+      --rule:    #443F38;
+      --accent:  #5FBBA0;
+      --accent-soft: #1E2E29;
+
+      --pass:    #5FBBA0;
+      --pending: #D9A227;
+      --gone:    #E0715F;
+
+      --c1: #C08E5C;
+      --c2: #5FBE79;
+      --c3: #E0A048;
+      --c4: #E0715F;
+      --c5: #B87FD4;
+      --c6: #6FA3DE;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper:   #191814;
+    --surface: #211F1A;
+    --ink:     #EAE6DE;
+    --muted:   #9A9287;
+    --line:    #34302A;
+    --rule:    #443F38;
+    --accent:  #5FBBA0;
+    --accent-soft: #1E2E29;
+
+    --pass:    #5FBBA0;
+    --pending: #D9A227;
+    --gone:    #E0715F;
+
+    --c1: #C08E5C;
+    --c2: #5FBE79;
+    --c3: #E0A048;
+    --c4: #E0715F;
+    --c5: #B87FD4;
+    --c6: #6FA3DE;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "IBM Plex Sans KR", "Malgun Gothic", system-ui, sans-serif;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: var(--wide);
+    margin: 0 auto;
+    padding: 0 1.5rem 6rem;
+  }
+
+  .col { max-width: var(--measure); }
+
+  /* ── 표제 ─────────────────────────────────────────────── */
+  header.masthead {
+    padding: 4.5rem 0 2.5rem;
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: 3rem;
+  }
+  .eyebrow {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: .75rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 1rem;
+  }
+  h1 {
+    font-family: "Gowun Batang", "Batang", serif;
+    font-weight: 700;
+    font-size: clamp(2.2rem, 6vw, 3.4rem);
+    line-height: 1.15;
+    letter-spacing: -.01em;
+    margin: 0 0 1.25rem;
+    text-wrap: balance;
+  }
+  .standfirst {
+    max-width: var(--measure);
+    font-size: 1.0625rem;
+    color: var(--muted);
+    margin: 0 0 2rem;
+  }
+  .standfirst b { color: var(--ink); font-weight: 500; }
+
+  .facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 2.5rem;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: .8125rem;
+    color: var(--muted);
+  }
+  .facts div { padding: .35rem 0; }
+  .facts b {
+    color: var(--ink);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── 파트 / 섹션 ───────────────────────────────────────── */
+  .part {
+    margin: 4.5rem 0 2.5rem;
+    padding-top: 1.25rem;
+    border-top: 3px double var(--rule);
+  }
+  .part .label {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: .75rem;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .part h2 {
+    font-family: "Gowun Batang", "Batang", serif;
+    font-weight: 700;
+    font-size: 1.9rem;
+    line-height: 1.3;
+    margin: .35rem 0 .6rem;
+  }
+  .part p { max-width: var(--measure); color: var(--muted); margin: 0; }
+
+  section { margin: 3rem 0; }
+  h3 {
+    font-family: "Gowun Batang", "Batang", serif;
+    font-weight: 700;
+    font-size: 1.3rem;
+    line-height: 1.4;
+    margin: 0 0 .75rem;
+    text-wrap: balance;
+  }
+  h4 {
+    font-size: .8125rem;
+    font-weight: 600;
+    letter-spacing: .06em;
+    color: var(--muted);
+    margin: 2rem 0 .5rem;
+  }
+  p { margin: 0 0 1rem; max-width: var(--measure); }
+  strong { font-weight: 600; }
+  code, .mono {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: .875em;
+  }
+  code {
+    background: var(--accent-soft);
+    padding: .1em .35em;
+    border-radius: 3px;
+  }
+
+  /* ── 공식 카드 ─────────────────────────────────────────── */
+  .formulas {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0;
+  }
+  .formula {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 1.1rem 1.2rem;
+  }
+  .formula .w {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: .75rem;
+    color: var(--accent);
+    letter-spacing: .08em;
+  }
+  .formula h5 {
+    margin: .2rem 0 .7rem;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+  .formula .eq {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: .8125rem;
+    line-height: 1.7;
+    padding: .6rem .7rem;
+    background: var(--paper);
+    border-radius: 3px;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .formula .why {
+    font-size: .875rem;
+    color: var(--muted);
+    margin: .7rem 0 0;
+    max-width: none;
+  }
+
+  /* ── 표 ───────────────────────────────────────────────── */
+  .scroll { overflow-x: auto; margin: 1.25rem 0; }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: .875rem;
+    min-width: 30rem;
+  }
+  caption {
+    text-align: left;
+    font-size: .8125rem;
+    color: var(--muted);
+    padding-bottom: .6rem;
+  }
+  th, td {
+    text-align: left;
+    padding: .55rem .7rem;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+  }
+  thead th {
+    font-size: .75rem;
+    font-weight: 600;
+    letter-spacing: .05em;
+    color: var(--muted);
+    border-bottom: 1px solid var(--rule);
+  }
+  td.num, th.num {
+    text-align: right;
+    font-family: "IBM Plex Mono", monospace;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+
+  .down { color: var(--gone); font-weight: 600; }
+  .up   { color: var(--pass); font-weight: 600; }
+
+  /* ── 도형 ─────────────────────────────────────────────── */
+  figure {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+  }
+  figure svg { display: block; width: 100%; height: auto; }
+  figcaption {
+    font-size: .8125rem;
+    color: var(--muted);
+    margin-top: 1rem;
+    padding-top: .85rem;
+    border-top: 1px solid var(--line);
+  }
+  svg text { font-family: "IBM Plex Sans KR", sans-serif; }
+  svg .m { font-family: "IBM Plex Mono", monospace; }
+
+  /* ── 상태 배지 ─────────────────────────────────────────── */
+  .status-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+    gap: .4rem 1.5rem;
+    margin: 1.25rem 0;
+    font-size: .875rem;
+  }
+  .status-grid div {
+    display: flex;
+    gap: .6rem;
+    align-items: baseline;
+    padding: .3rem 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .dot {
+    flex: none;
+    width: .55rem; height: .55rem;
+    border-radius: 50%;
+    background: var(--pass);
+    transform: translateY(-1px);
+  }
+  .dot.pending { background: var(--pending); }
+  .n {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: .75rem;
+    color: var(--muted);
+    min-width: 1.3rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── 콜아웃 ───────────────────────────────────────────── */
+  .callout {
+    border-left: 3px solid var(--accent);
+    background: var(--accent-soft);
+    padding: 1rem 1.25rem;
+    margin: 1.75rem 0;
+    border-radius: 0 4px 4px 0;
+  }
+  .callout p { margin: 0; max-width: none; }
+  .callout p + p { margin-top: .6rem; }
+
+  .warn { border-left-color: var(--pending); background: transparent;
+          border: 1px solid var(--line); border-left: 3px solid var(--pending); }
+
+  /* ── 카테고리 칩 ───────────────────────────────────────── */
+  .cats { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1rem 0 1.5rem; }
+  .cat {
+    display: inline-flex; align-items: center; gap: .4rem;
+    font-size: .8125rem;
+    padding: .25rem .7rem .25rem .55rem;
+    border: 1px solid var(--line);
+    border-radius: 99px;
+  }
+  .cat i { width: .5rem; height: .5rem; border-radius: 50%; }
+  .cat b { font-family: "IBM Plex Mono", monospace; font-weight: 500; color: var(--muted); }
+  .cat.thin { border-style: dashed; border-color: var(--pending); }
+  .cat.thin b { color: var(--pending); }
+
+  ul { max-width: var(--measure); padding-left: 1.2rem; margin: 0 0 1rem; }
+  li { margin-bottom: .4rem; }
+
+  footer {
+    margin-top: 5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--rule);
+    font-size: .8125rem;
+    color: var(--muted);
+  }
+
+  @media (max-width: 640px) {
+    header.masthead { padding-top: 3rem; }
+    figure { padding: 1rem; }
+  }
+</style>
+
+<div class="wrap">
+
+<header class="masthead">
+  <p class="eyebrow">맵으로 공주 · 개발기획안 v2.1</p>
+  <h1>지도를 열고, 누르고, 찜하면<br>순서가 다시 매겨진다</h1>
+  <p class="standfirst">
+    공주시 30곳을 지도에서 탐색하는 수업용 웹 서비스의 기획과 동작 로직.
+    학생에게 남겨야 하는 것은 돌아가는 지도가 아니라
+    <b>리뷰 수가 다른 별점을 공정하게 비교하는 방법을 손으로 계산해 설명할 수 있는 상태</b>다.
+    아래 모든 설계 결정이 이 한 문장에 종속된다.
+  </p>
+  <div class="facts">
+    <div>장소 <b>30곳</b></div>
+    <div>라우트 <b>7개</b></div>
+    <div>차시 <b>12</b></div>
+    <div>검증 <b>15/16</b> 통과</div>
+    <div>JavaScript <b>1블록</b></div>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="part">
+  <span class="label">Part 1</span>
+  <h2>기획 — 왜 이렇게 정했나</h2>
+  <p>같은 지역(공주시)을 다루는 자매 프로젝트 v2.4와 의도적으로 정반대로 설계했다.
+     학생이 두 프로젝트를 나란히 놓고 “데이터와 UI를 바꾸면 전혀 다른 서비스가 된다”를 체감하게 하려는 것이다.</p>
+</div>
+
+<section>
+  <h3>v2.4와 무엇이 다른가</h3>
+  <div class="scroll">
+    <table>
+      <thead>
+        <tr><th>축</th><th>v2.4 · AI 관광추천</th><th>이 프로젝트 · 맵으로 공주</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>첫 화면</td><td>취향 입력 폼</td><td>지도 그 자체 — 마커 30개가 곧 홈</td></tr>
+        <tr><td>사용자 행동</td><td>폼 제출 1회 → 결과</td><td>탐색 루프 — 필터 → 클릭 → 찜 → 동선</td></tr>
+        <tr><td>취향 파악</td><td>명시적 입력(테마 0~5점)</td><td>암묵 피드백 — 열람·찜 로그로 자동 학습</td></tr>
+        <tr><td>핵심 데이터</td><td>교사가 설계한 테마·소요시간</td><td>네이버플레이스 실측치 — 별점·리뷰수</td></tr>
+        <tr><td>핵심 알고리즘</td><td>코사인 유사도 + 협업필터링</td><td>베이지안 보정 별점 + 거리 + 취향</td></tr>
+        <tr><td>손계산 목표</td><td>코사인 유사도 1건</td><td>보정 별점 1건</td></tr>
+        <tr><td>JavaScript</td><td>0줄</td><td>지도 초기화 1블록만</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <h3>기획안 v1.0에서 반드시 고쳐야 했던 다섯 가지</h3>
+  <p>방향은 옳았지만, 그대로 구현하면 <strong>동작은 하는데 가르치려던 것이 화면에 나타나지 않는</strong>
+     실패가 일어나는 지점이 다섯 군데 있었다. 이 유형이 가장 위험하다 — 오류가 안 나니 아무도 모른다.</p>
+  <div class="scroll">
+    <table>
+      <caption>각 항목의 근거 수치는 Part 2에서 실제 값으로 다시 나온다.</caption>
+      <thead>
+        <tr><th style="width:22%">v1.0</th><th>왜 치명적인가</th><th style="width:26%">확정</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>별점을 <code>÷5</code>로 환산</td>
+          <td>실데이터 별점은 좁은 구간에 뭉친다. 변별폭 0.12로 거리 항(0~1)에 완패 —
+              <strong>가중치는 0.5 : 0.3인데 실제 영향력은 1 : 5</strong></td>
+          <td>30곳 기준 min-max 정규화</td>
+        </tr>
+        <tr>
+          <td>취향 부스트 = 관심도</td>
+          <td>6분류 균등이면 값이 0.167. 다른 두 점수가 0.5 근처인데 부스트만 늘 바닥에 깔린다</td>
+          <td>관심도 ÷ (관심도 + 1/6) → 균등이 0.5</td>
+        </tr>
+        <tr>
+          <td>거리 기준점 = “지도 중심”</td>
+          <td>지도 중심을 서버가 알려면 AJAX가 필요 — “JS는 지도 초기화만” 원칙과 정면 충돌</td>
+          <td>select 폼 + 세션 기록</td>
+        </tr>
+        <tr>
+          <td>오프라인 시 SVG 자동 폴백</td>
+          <td>타일 실패 감지도 JS다. 게다가 정적 SVG는 점수·필터를 반영하지 못한다</td>
+          <td>서버 기동 시 1회 판정 + 인라인 SVG</td>
+        </tr>
+        <tr>
+          <td>도보 4km/h 고정</td>
+          <td>공산성→마곡사 14.7km가 <strong>“도보 286분”</strong>으로 표시된다.
+              학생이 결과를 믿지 않는 순간 수업이 끝난다</td>
+          <td>3km 초과는 차량 40km/h</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <h3>12차시와 배점</h3>
+  <p>5–6차시가 이 수업의 심장이다. 학생이 보정 별점을 자기 손으로 한 번 계산해 봐야
+     루브릭의 25점이 살아난다. <strong>이 차시만은 줄이지 않는다.</strong></p>
+  <div class="scroll">
+    <table>
+      <thead><tr><th class="num">차시</th><th>내용</th><th class="num">배점</th><th>확인 방법</th></tr></thead>
+      <tbody>
+        <tr><td class="num">1–3</td><td>환경 · 데이터 점검 · 정제와 적재</td><td class="num">20</td><td>33→30행, 콤마·중복·매핑 설명</td></tr>
+        <tr><td class="num">4</td><td>지도에 마커 30개 (첫 “우와” 지점)</td><td class="num" rowspan="2">25</td><td rowspan="2">지도→패널→찜→동선 시연</td></tr>
+        <tr><td class="num">8–9</td><td>패널 · 찜 · 클릭 로그 · 동선 · 통계</td></tr>
+        <tr><td class="num">5–6</td><td><strong>보정 별점 + 손계산 검증</strong></td><td class="num">25</td><td><strong>손계산 1건 + 뒤집힌 이유 설명</strong></td></tr>
+        <tr><td class="num">7</td><td>정규화 · 거리 · 취향 · 최종 점수</td><td class="num">15</td><td>프롬프트·오류 수정 기록 3건</td></tr>
+        <tr><td class="num">10–12</td><td>튜닝 · 오류 수정 · 발표</td><td class="num">15</td><td>개선 아이디어 1가지</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="part">
+  <span class="label">Part 2</span>
+  <h2>동작 로직 — 무엇이 어떻게 도는가</h2>
+  <p>데이터가 만들어지는 길, 요청 한 번에 벌어지는 일, 점수 세 개, 그리고 사용자의 행동이
+     다시 점수로 돌아오는 루프. 아래 수치는 전부 지금 돌고 있는 시스템의 실제 값이다.</p>
+</div>
+
+<section>
+  <h3>2.1 데이터가 만들어지는 길</h3>
+  <p>원본 CSV는 <strong>일부러, 그리고 실제로</strong> 지저분하다. 네이버플레이스 데이터는 오염을
+     주입할 필요가 거의 없다 — 정제 작업 자체가 1~3차시의 실습이다.</p>
+
+  <figure>
+    <svg viewBox="0 0 900 250" role="img" aria-label="places_raw.csv 33행이 preprocess.py를 지나 30행이 되고, init_db.py가 보정 별점과 meta를 더해 place.db가 되는 흐름">
+      <defs>
+        <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"/>
+        </marker>
+      </defs>
+
+      <!-- 1 raw -->
+      <rect x="10" y="70" width="170" height="76" rx="3" fill="none" stroke="currentColor" stroke-width="1.2"/>
+      <text x="95" y="97" text-anchor="middle" font-size="13" fill="currentColor">places_raw.csv</text>
+      <text x="95" y="120" text-anchor="middle" font-size="19" class="m" fill="currentColor" font-weight="600">33행</text>
+      <text x="95" y="137" text-anchor="middle" font-size="10.5" fill="currentColor" opacity=".6">수기 수집 원본</text>
+
+      <!-- arrow 1 -->
+      <line x1="184" y1="108" x2="248" y2="108" stroke="currentColor" stroke-width="1.2" marker-end="url(#ar)"/>
+      <text x="216" y="98" text-anchor="middle" font-size="10.5" class="m" fill="currentColor" opacity=".75">정제</text>
+
+      <!-- 2 preprocess -->
+      <rect x="252" y="46" width="186" height="124" rx="3" fill="none" stroke="var(--accent)" stroke-width="1.4"/>
+      <text x="345" y="68" text-anchor="middle" font-size="12.5" class="m" fill="var(--accent)">preprocess.py</text>
+      <line x1="266" y1="78" x2="424" y2="78" stroke="var(--accent)" stroke-width=".7" opacity=".4"/>
+      <text x="268" y="97"  font-size="11" fill="currentColor">콤마 숫자화 <tspan class="m" opacity=".7">6건</tspan></text>
+      <text x="268" y="116" font-size="11" fill="currentColor">좌표 결측 제외 <tspan class="m" opacity=".7">−1</tspan></text>
+      <text x="268" y="135" font-size="11" fill="currentColor">중복 제거 <tspan class="m" opacity=".7">−2</tspan></text>
+      <text x="268" y="154" font-size="11" fill="currentColor">카테고리 매핑 <tspan class="m" opacity=".7">33건</tspan></text>
+
+      <!-- arrow 2 -->
+      <line x1="442" y1="108" x2="506" y2="108" stroke="currentColor" stroke-width="1.2" marker-end="url(#ar)"/>
+      <text x="474" y="98" text-anchor="middle" font-size="10.5" class="m" fill="currentColor" opacity=".75">적재</text>
+
+      <!-- 3 clean -->
+      <rect x="510" y="70" width="150" height="76" rx="3" fill="none" stroke="currentColor" stroke-width="1.2"/>
+      <text x="585" y="97" text-anchor="middle" font-size="13" fill="currentColor">places_clean.csv</text>
+      <text x="585" y="120" text-anchor="middle" font-size="19" class="m" fill="currentColor" font-weight="600">30행</text>
+      <text x="585" y="137" text-anchor="middle" font-size="10.5" fill="currentColor" opacity=".6">정제 정답</text>
+
+      <!-- arrow 3 -->
+      <line x1="664" y1="108" x2="722" y2="108" stroke="currentColor" stroke-width="1.2" marker-end="url(#ar)"/>
+
+      <!-- 4 db -->
+      <rect x="726" y="52" width="164" height="112" rx="3" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.4"/>
+      <text x="808" y="75" text-anchor="middle" font-size="13" class="m" fill="var(--accent)">place.db</text>
+      <line x1="740" y1="85" x2="876" y2="85" stroke="var(--accent)" stroke-width=".7" opacity=".4"/>
+      <text x="808" y="104" text-anchor="middle" font-size="11" fill="currentColor">+ adj_star</text>
+      <text x="808" y="123" text-anchor="middle" font-size="11" fill="currentColor">+ adj_min / adj_max</text>
+      <text x="808" y="142" text-anchor="middle" font-size="11" fill="currentColor">+ meta</text>
+
+      <!-- init_db label -->
+      <text x="695" y="98" text-anchor="middle" font-size="10.5" class="m" fill="currentColor" opacity=".75">init_db</text>
+
+      <!-- params.json feeding init_db -->
+      <rect x="726" y="196" width="164" height="40" rx="3" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="4 3" opacity=".7"/>
+      <text x="808" y="214" text-anchor="middle" font-size="11" class="m" fill="currentColor" opacity=".85">params.json</text>
+      <text x="808" y="229" text-anchor="middle" font-size="10.5" class="m" fill="currentColor" opacity=".6">m = 30 · C = 4.30</text>
+      <line x1="808" y1="192" x2="808" y2="170" stroke="currentColor" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#ar)" opacity=".7"/>
+    </svg>
+    <figcaption>
+      보정 별점은 <strong>적재 시점에 한 번만</strong> 계산해 컬럼으로 저장한다.
+      정규화에 쓰는 <code>adj_min</code>·<code>adj_max</code>가 요청마다 흔들리면
+      같은 장소의 순위가 새로고침마다 달라지기 때문이다.
+      상수 <code>m</code>·<code>C</code>는 <code>params.json</code> 한 곳에서만 온다 —
+      코드·검증·교재가 모두 이 파일을 읽는다.
+    </figcaption>
+  </figure>
+
+  <h4>원본 33행에 심어 둔 오염 다섯 가지</h4>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>유형</th><th class="num">건수</th><th>내용</th><th>정제 규칙</th></tr></thead>
+      <tbody>
+        <tr><td>중복 행</td><td class="num">2</td><td><code>개성집</code> / <code>개성집공주점</code>, 공백 표기 차이</td><td>접미사·공백 제거 후 비교, 리뷰 많은 행을 남김</td></tr>
+        <tr><td>리뷰수 콤마</td><td class="num">6</td><td><code>"1,204"</code> — 문자열이라 정렬·계산 불가</td><td>콤마 제거 후 정수 변환</td></tr>
+        <tr><td>별점 결측</td><td class="num">5</td><td>리뷰가 적어 별점이 아직 없는 곳</td><td>지우지 않는다 — 알고리즘이 흡수</td></tr>
+        <tr><td>좌표 결측</td><td class="num">1</td><td>관광지가 아닌 검색 결과가 섞임</td><td>지도에 못 찍으므로 제외</td></tr>
+        <tr><td>카테고리 미매핑</td><td class="num">33</td><td>원문이 <code>사찰</code>·<code>베이커리</code>처럼 제각각</td><td>매핑표로 표준 6분류 통일</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="cats">
+    <span class="cat"><i style="background:var(--c1)"></i>역사문화 <b>11</b></span>
+    <span class="cat"><i style="background:var(--c2)"></i>자연 <b>4</b></span>
+    <span class="cat"><i style="background:var(--c3)"></i>체험 <b>4</b></span>
+    <span class="cat"><i style="background:var(--c4)"></i>먹거리 <b>4</b></span>
+    <span class="cat thin"><i style="background:var(--c5)"></i>카페감성 <b>2</b></span>
+    <span class="cat"><i style="background:var(--c6)"></i>휴식 <b>5</b></span>
+  </div>
+  <p class="mono" style="font-size:.8125rem;color:var(--muted)">
+    카페감성이 4곳에 못 미친다 — 필터 칩 하나가 거의 빈 화면이 된다. 남은 수집 작업에서 보강할 항목.
+  </p>
+</section>
+
+<section>
+  <h3>2.2 요청 한 번에 벌어지는 일</h3>
+  <p>필터·기준점·가중치·확장 스위치는 전부 주소창의 값이다. 폼을 제출하면 페이지가 다시 그려진다 —
+     <strong>AJAX도, 상태를 들고 있는 프런트엔드도 없다.</strong></p>
+
+  <figure>
+    <svg viewBox="0 0 900 320" role="img" aria-label="GET 요청이 장소 30곳에 세 가지 점수를 매기고 가중합한 뒤 정렬해 마커와 랭킹으로 나가는 흐름">
+      <defs>
+        <marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"/>
+        </marker>
+      </defs>
+
+      <!-- request -->
+      <rect x="10" y="120" width="164" height="80" rx="3" fill="none" stroke="currentColor" stroke-width="1.2"/>
+      <text x="92" y="145" text-anchor="middle" font-size="12.5" class="m" fill="currentColor">GET /</text>
+      <text x="92" y="166" text-anchor="middle" font-size="10.5" class="m" fill="currentColor" opacity=".7">?cat= &amp;origin=</text>
+      <text x="92" y="182" text-anchor="middle" font-size="10.5" class="m" fill="currentColor" opacity=".7">&amp;w_star= &amp;w_dist=</text>
+
+      <line x1="178" y1="160" x2="222" y2="160" stroke="currentColor" stroke-width="1.2" marker-end="url(#ar2)"/>
+
+      <!-- three scores -->
+      <rect x="226" y="34" width="196" height="70" rx="3" fill="none" stroke="var(--accent)" stroke-width="1.3"/>
+      <text x="240" y="57" font-size="12" fill="currentColor">별점 점수</text>
+      <text x="240" y="76" font-size="10.5" class="m" fill="currentColor" opacity=".7">(adj − 3.676) / 1.091</text>
+      <text x="240" y="93" font-size="10.5" class="m" fill="var(--accent)">가중치 0.5</text>
+
+      <rect x="226" y="125" width="196" height="70" rx="3" fill="none" stroke="var(--accent)" stroke-width="1.3"/>
+      <text x="240" y="148" font-size="12" fill="currentColor">거리 점수</text>
+      <text x="240" y="167" font-size="10.5" class="m" fill="currentColor" opacity=".7">1 / (1 + km)</text>
+      <text x="240" y="184" font-size="10.5" class="m" fill="var(--accent)">가중치 0.3</text>
+
+      <rect x="226" y="216" width="196" height="70" rx="3" fill="none" stroke="var(--accent)" stroke-width="1.3"/>
+      <text x="240" y="239" font-size="12" fill="currentColor">취향 부스트</text>
+      <text x="240" y="258" font-size="10.5" class="m" fill="currentColor" opacity=".7">x / (x + 1/6)</text>
+      <text x="240" y="275" font-size="10.5" class="m" fill="var(--accent)">가중치 0.2</text>
+
+      <!-- converge -->
+      <path d="M 426 69 L 470 69 L 470 160" fill="none" stroke="currentColor" stroke-width="1.1"/>
+      <path d="M 426 160 L 470 160" fill="none" stroke="currentColor" stroke-width="1.1"/>
+      <path d="M 426 251 L 470 251 L 470 160" fill="none" stroke="currentColor" stroke-width="1.1"/>
+      <line x1="470" y1="160" x2="516" y2="160" stroke="currentColor" stroke-width="1.2" marker-end="url(#ar2)"/>
+
+      <!-- final -->
+      <rect x="520" y="118" width="150" height="84" rx="3" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.4"/>
+      <text x="595" y="143" text-anchor="middle" font-size="12.5" class="m" fill="var(--accent)">final</text>
+      <text x="595" y="164" text-anchor="middle" font-size="10.5" fill="currentColor">가중합 0~1</text>
+      <text x="595" y="185" text-anchor="middle" font-size="10.5" fill="currentColor" opacity=".7">합이 1이 아니면 나눠 맞춤</text>
+
+      <line x1="674" y1="160" x2="716" y2="160" stroke="currentColor" stroke-width="1.2" marker-end="url(#ar2)"/>
+      <text x="695" y="150" text-anchor="middle" font-size="10.5" class="m" fill="currentColor" opacity=".7">정렬</text>
+
+      <!-- output -->
+      <rect x="720" y="90" width="170" height="140" rx="3" fill="none" stroke="currentColor" stroke-width="1.2"/>
+      <text x="805" y="114" text-anchor="middle" font-size="12.5" fill="currentColor">화면</text>
+      <line x1="734" y1="124" x2="876" y2="124" stroke="currentColor" stroke-width=".7" opacity=".35"/>
+      <text x="805" y="145" text-anchor="middle" font-size="11" fill="currentColor">마커 크기 3단계</text>
+      <text x="805" y="167" text-anchor="middle" font-size="11" fill="currentColor">우측 랭킹 30줄</text>
+      <text x="805" y="196" text-anchor="middle" font-size="10.5" class="m" fill="currentColor" opacity=".65">동점 규칙</text>
+      <text x="805" y="212" text-anchor="middle" font-size="10.5" class="m" fill="currentColor" opacity=".65">final ↓ 리뷰 ↓ id ↑</text>
+    </svg>
+    <figcaption>
+      동점 규칙이 없으면 순위가 새로고침마다 바뀐다. 별점이 없는 5곳은 보정 별점이
+      <strong>정확히 같은 값</strong>이 되기 때문이다 — 다음 절에서 이유가 나온다.
+    </figcaption>
+  </figure>
+</section>
+
+<section>
+  <h3>2.3 점수 세 개</h3>
+
+  <div class="formulas">
+    <div class="formula">
+      <span class="w">가중치 0.5</span>
+      <h5>보정 별점 → 별점 점수</h5>
+      <div class="eq">(v×R + 30×4.30) / (v + 30)<br>→ (adj − 3.676) / (4.767 − 3.676)</div>
+      <p class="why">리뷰가 적은 별점은 전체 평균 쪽으로 끌려온다.
+        그다음 30곳의 최저를 0, 최고를 1로 편다 — 안 그러면 좁은 구간에 뭉쳐
+        순위에 영향을 주지 못한다.</p>
+    </div>
+    <div class="formula">
+      <span class="w">가중치 0.3</span>
+      <h5>거리 점수</h5>
+      <div class="eq">1 / (1 + km)<br>0km → 1.0 · 1km → 0.5 · 4km → 0.2</div>
+      <p class="why">기준점은 상단 select에서 고른다. 상세 화면을 열면 그 장소가
+        기준점이 되어, 지도로 돌아오면 “방금 본 곳에서 가까운 순서”가 된다.</p>
+    </div>
+    <div class="formula">
+      <span class="w">가중치 0.2</span>
+      <h5>취향 부스트</h5>
+      <div class="eq">관심도 / (관심도 + 1/6)<br>균등 → 0.5 · 로그 5건 미만 → 0.5</div>
+      <p class="why">보정 별점과 <strong>같은 꼴</strong>이다 — <code>x / (x + 기준값)</code>.
+        관심도를 균등이라는 기준 쪽으로 끌어당긴다. 학생은 같은 아이디어를 두 번 만난다.</p>
+    </div>
+  </div>
+
+  <div class="callout">
+    <p><strong>결측 별점의 성질을 수업에서 반드시 짚는다.</strong></p>
+    <p>별점이 없으면 R 자리에 전체 평균 C를 넣는다. 그러면 식이
+      <code class="mono">(v×C + m×C) / (v+m) = C</code>로 정리되어
+      <strong>리뷰가 2개든 500개든 결과가 정확히 4.30</strong>이 된다.
+      별점이 없으면 리뷰 수는 아무 정보도 주지 못하기 때문이다.</p>
+  </div>
+
+  <h4>실제로 순위가 뒤집힌 다섯 곳</h4>
+  <div class="scroll">
+    <table>
+      <caption>보정 전(별점순)과 보정 후(보정 별점순) 순위가 3계단 이상 움직인 장소. 12차시 발표의 주인공이 여기서 나온다.</caption>
+      <thead>
+        <tr><th>장소</th><th class="num">별점</th><th class="num">리뷰</th><th class="num">보정 전</th><th class="num">보정 후</th><th class="num">변동</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>곡물집</td><td class="num">5.0</td><td class="num">2</td><td class="num">1</td><td class="num">12</td><td class="num down">▼11</td></tr>
+        <tr><td>계룡산상신농촌체험휴양마을</td><td class="num">4.9</td><td class="num">4</td><td class="num">2</td><td class="num">11</td><td class="num down">▼9</td></tr>
+        <tr><td>마곡사</td><td class="num">4.6</td><td class="num">1,532</td><td class="num">7</td><td class="num">2</td><td class="num up">▲5</td></tr>
+        <tr><td>개성집공주점</td><td class="num">4.5</td><td class="num">1,287</td><td class="num">8</td><td class="num">3</td><td class="num up">▲5</td></tr>
+        <tr><td>천주교황새바위순교성지</td><td class="num">3.8</td><td class="num">92</td><td class="num">23</td><td class="num">20</td><td class="num up">▲3</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>뒤집힘은 저절로 생기지 않는다. 보정 전 랭킹도 동점을 리뷰 수로 깨기 때문에,
+     별점 등급이 같은 무리 안에서는 순서가 거의 그대로다. 크게 움직이는 곳은 두 종류뿐이다 —
+     <strong>리뷰가 아주 적고 별점이 아주 높은 곳</strong>(끌려 내려간다)과
+     <strong>리뷰가 아주 많고 별점이 높은 편인 곳</strong>(자기 별점을 지켜 올라간다).</p>
+</section>
+
+<section>
+  <h3>2.4 행동이 다시 점수로 돌아오는 루프</h3>
+  <p>취향을 폼으로 묻지 않는다. 장소를 열어 보고 찜하는 행동이 그대로 다음 순위에 반영된다.</p>
+
+  <figure>
+    <svg viewBox="0 0 900 260" role="img" aria-label="상세 열람과 찜이 로그로 쌓이고, 카테고리 관심도를 거쳐 취향 부스트가 되어 다시 랭킹에 반영되는 순환">
+      <defs>
+        <marker id="ar3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"/>
+        </marker>
+      </defs>
+
+      <rect x="16" y="46" width="150" height="66" rx="3" fill="none" stroke="currentColor" stroke-width="1.2"/>
+      <text x="91" y="72" text-anchor="middle" font-size="12" fill="currentColor">상세 열람</text>
+      <text x="91" y="92" text-anchor="middle" font-size="10.5" class="m" fill="currentColor" opacity=".65">view</text>
+
+      <rect x="16" y="140" width="150" height="66" rx="3" fill="none" stroke="currentColor" stroke-width="1.2"/>
+      <text x="91" y="166" text-anchor="middle" font-size="12" fill="currentColor">찜</text>
+      <text x="91" y="186" text-anchor="middle" font-size="10.5" class="m" fill="currentColor" opacity=".65">favorites</text>
+
+      <path d="M 170 79 L 214 79 L 214 118 L 258 118" fill="none" stroke="currentColor" stroke-width="1.1" marker-end="url(#ar3)"/>
+      <path d="M 170 173 L 214 173 L 214 130 L 258 130" fill="none" stroke="currentColor" stroke-width="1.1" marker-end="url(#ar3)"/>
+      <text x="196" y="60" font-size="10" class="m" fill="currentColor" opacity=".7">×1</text>
+      <text x="196" y="205" font-size="10" class="m" fill="currentColor" opacity=".7">×3</text>
+
+      <rect x="262" y="88" width="186" height="72" rx="3" fill="none" stroke="var(--accent)" stroke-width="1.3"/>
+      <text x="355" y="113" text-anchor="middle" font-size="12" fill="currentColor">카테고리 관심도</text>
+      <text x="355" y="134" text-anchor="middle" font-size="10.5" class="m" fill="currentColor" opacity=".7">6분류 비율, 합 = 1</text>
+      <text x="355" y="151" text-anchor="middle" font-size="10.5" class="m" fill="var(--accent)">신호 5건 미만이면 중립</text>
+
+      <line x1="452" y1="124" x2="500" y2="124" stroke="currentColor" stroke-width="1.2" marker-end="url(#ar3)"/>
+
+      <rect x="504" y="88" width="166" height="72" rx="3" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.3"/>
+      <text x="587" y="113" text-anchor="middle" font-size="12" fill="currentColor">취향 부스트</text>
+      <text x="587" y="136" text-anchor="middle" font-size="10.5" class="m" fill="currentColor" opacity=".75">x / (x + 1/6)</text>
+      <text x="587" y="152" text-anchor="middle" font-size="10.5" class="m" fill="currentColor" opacity=".6">0 ~ 0.86</text>
+
+      <line x1="674" y1="124" x2="720" y2="124" stroke="currentColor" stroke-width="1.2" marker-end="url(#ar3)"/>
+
+      <rect x="724" y="88" width="160" height="72" rx="3" fill="none" stroke="currentColor" stroke-width="1.2"/>
+      <text x="804" y="118" text-anchor="middle" font-size="12" fill="currentColor">지도 랭킹</text>
+      <text x="804" y="139" text-anchor="middle" font-size="10.5" class="m" fill="currentColor" opacity=".65">final의 20%</text>
+
+      <!-- feedback edge -->
+      <path d="M 804 164 L 804 226 L 91 226 L 91 118" fill="none" stroke="var(--accent)" stroke-width="1.2" stroke-dasharray="5 4" marker-end="url(#ar3)"/>
+      <text x="448" y="243" text-anchor="middle" font-size="10.5" class="m" fill="var(--accent)">다시 누른다 — 이것이 암묵 피드백</text>
+    </svg>
+    <figcaption>
+      두 가지 방어 장치가 이 루프에 들어 있다. <strong>같은 장소의 열람은 10분 안에 다시 기록하지 않는다</strong>
+      — 새로고침 몇 번으로 한 카테고리 관심도가 치솟는 것을 막는다.
+      그리고 <strong>찜은 로그가 아니라 현재 상태에서 센다</strong> — 찜을 취소하면 저절로 상쇄된다.
+    </figcaption>
+  </figure>
+</section>
+
+<section>
+  <h3>2.5 동선 — 추천이 아니라 정렬</h3>
+  <p>코스를 추천하지 않는다. 학생이 찜한 곳을 <strong>다니기 좋은 순서로 늘어놓기만</strong> 한다.
+     가장 북쪽에서 출발해 매번 가장 가까운 곳으로 옮겨 가는 탐욕 알고리즘이고,
+     <strong>최적해가 아니라는 사실을 화면에 그대로 적는다.</strong> 그 한계도 교육 내용이다.</p>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>구간 거리</th><th>수단</th><th>계산</th><th>예</th></tr></thead>
+      <tbody>
+        <tr><td>3km 이하</td><td>도보</td><td class="mono">km × 1.3 ÷ 4km/h</td><td>1.0km → 도보 20분</td></tr>
+        <tr><td>3km 초과</td><td>차량</td><td class="mono">km × 1.3 ÷ 40km/h</td><td>공산성→마곡사 14.7km → 차량 29분</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>차량 구간이 하나라도 있으면 <strong>“이 동선은 걸어서 다닐 수 없습니다”</strong>를 상단에 띄운다.
+     검증은 찜 4곳의 모든 순열 24가지를 실제로 계산해, 탐욕법 결과가 평균보다 짧은지 확인한다
+     (현재 3.54km · 평균 4.31km · 최적 3.23km).</p>
+</section>
+
+<section>
+  <h3>2.6 지도가 없을 때</h3>
+  <p>학교망이 타일 서버나 CDN을 막는 경우가 흔하다. 그래서 서버가 켜질 때 <strong>딱 한 번</strong>
+     확인하고 화면을 나눈다 — 매 요청마다 확인하면 느려지고, 브라우저에서 감지하려면 JS가 필요하다.</p>
+
+  <figure>
+    <svg viewBox="0 0 760 150" role="img" aria-label="서버 기동 시 타일 서버와 로컬 번들 유무를 확인해 Leaflet 지도와 SVG 산점도로 갈리는 분기">
+      <defs>
+        <marker id="ar4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"/>
+        </marker>
+      </defs>
+      <rect x="10" y="46" width="216" height="58" rx="3" fill="none" stroke="currentColor" stroke-width="1.2"/>
+      <text x="118" y="70" text-anchor="middle" font-size="12" fill="currentColor">서버 기동 시 1회 확인</text>
+      <text x="118" y="90" text-anchor="middle" font-size="10.5" class="m" fill="currentColor" opacity=".65">타일 서버 · 로컬 번들</text>
+
+      <path d="M 230 75 L 262 75 L 262 36 L 300 36" fill="none" stroke="currentColor" stroke-width="1.1" marker-end="url(#ar4)"/>
+      <path d="M 230 75 L 262 75 L 262 116 L 300 116" fill="none" stroke="currentColor" stroke-width="1.1" marker-end="url(#ar4)"/>
+      <text x="278" y="28" font-size="10" class="m" fill="currentColor" opacity=".7">둘 다 있음</text>
+      <text x="278" y="136" font-size="10" class="m" fill="currentColor" opacity=".7">하나라도 없음</text>
+
+      <rect x="304" y="14" width="200" height="44" rx="3" fill="none" stroke="currentColor" stroke-width="1.2"/>
+      <text x="404" y="41" text-anchor="middle" font-size="12" fill="currentColor">Leaflet 지도 + 마커</text>
+
+      <rect x="304" y="94" width="200" height="44" rx="3" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.3"/>
+      <text x="404" y="121" text-anchor="middle" font-size="12" fill="currentColor">인라인 SVG 산점도</text>
+
+      <line x1="508" y1="116" x2="546" y2="116" stroke="var(--accent)" stroke-width="1.1" marker-end="url(#ar4)"/>
+      <text x="556" y="106" font-size="11" fill="currentColor">점수·필터가</text>
+      <text x="556" y="124" font-size="11" fill="currentColor">그대로 반영된다</text>
+    </svg>
+    <figcaption>
+      정적 이미지 파일이 아니라 <strong>지금 점수와 필터가 반영된 그림</strong>이다.
+      원도심 장소들은 서로 1km 안쪽이라 겹치는 점은 조금 밀어내고, 이름표는 아예 그리지 않는다 —
+      번호가 옆 목록과 1:1로 대응하므로 정보는 잃지 않는다.
+    </figcaption>
+  </figure>
+</section>
+
+<section>
+  <h3>2.7 확장 스위치 — 켜지 않으면 없는 것과 같다</h3>
+  <p>확장 기능은 전부 기본값이 꺼짐이다. 이 원칙은 말이 아니라 테스트가 지킨다 —
+     <strong>확장을 켜지 않은 화면의 랭킹 순서가 기본과 완전히 같은지</strong> 매번 확인한다.</p>
+  <div class="scroll">
+    <table>
+      <thead><tr><th class="num">#</th><th>확장</th><th>켜는 법</th><th>상태</th></tr></thead>
+      <tbody>
+        <tr><td class="num">2</td><td>블로그리뷰도 신호로 (v = 방문자 + 0.3×블로그)</td><td class="mono">?use_blog=1</td><td>구현</td></tr>
+        <tr><td class="num">3</td><td>두 사람 찜 합쳐 동선 짜기</td><td>찜 목록에서 짝꿍 코드 입력</td><td>구현</td></tr>
+        <tr><td class="num">4</td><td>히트맵 — 마커 크기를 누적 클릭 수로</td><td class="mono">?heat=1</td><td>구현</td></tr>
+        <tr><td class="num">1</td><td>영업시간 반영 (“지금 열었나”)</td><td class="mono">?open_now=1</td><td>영업시간 수집 필요</td></tr>
+        <tr><td class="num">5</td><td>실시간 API로 CSV 갱신 (심화반)</td><td>별도 실행</td><td>API 키 발급 필요</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="part">
+  <span class="label">Part 3</span>
+  <h2>지금 상태</h2>
+  <p>코드는 완성되어 동작한다. 남은 것은 사람이 해야 하는 데이터 수집 하나다.</p>
+</div>
+
+<section>
+  <h3>검증 16항목</h3>
+  <div class="status-grid">
+    <div><span class="dot"></span><span class="n">0</span>원본 33행 → 정제 30행</div>
+    <div><span class="dot"></span><span class="n">1</span>리뷰 수 전부 정수</div>
+    <div><span class="dot pending"></span><span class="n">2</span>분류별 4곳 이상 — 수집 대기</div>
+    <div><span class="dot"></span><span class="n">3</span>결측 5곳 보정값이 전부 C</div>
+    <div><span class="dot"></span><span class="n">4</span>손계산과 코드가 2자리 일치</div>
+    <div><span class="dot"></span><span class="n">5</span>순위 3계단 이상 변동 5곳</div>
+    <div><span class="dot"></span><span class="n">6</span>정규화 min 0.0 / max 1.0</div>
+    <div><span class="dot"></span><span class="n">7</span>거리 0km→1.0, 1km→0.5</div>
+    <div><span class="dot"></span><span class="n">8</span>콜드스타트·균등 모두 0.5</div>
+    <div><span class="dot"></span><span class="n">9</span>동선이 24순열 평균보다 짧다</div>
+    <div><span class="dot"></span><span class="n">10</span>3km 초과는 차량 · 29분</div>
+    <div><span class="dot"></span><span class="n">11</span>오프라인에서 전 라우트 200</div>
+    <div><span class="dot"></span><span class="n">12</span>재실행해도 찜·로그 보존</div>
+    <div><span class="dot"></span><span class="n">13</span>확장 끄면 기본과 동일</div>
+    <div><span class="dot"></span><span class="n">14</span>블로그 반영값 별도 저장</div>
+    <div><span class="dot"></span><span class="n">15</span>잘못된 짝꿍 코드도 안전</div>
+  </div>
+
+  <div class="callout warn">
+    <p><strong>지금 별점과 리뷰 수는 임시값이다.</strong> 실제인 것은 장소명 30곳과 좌표뿐이다.</p>
+    <p>임시 상태는 화면 상단 배너·적재 로그·검증 결과에 모두 표시된다. 숨기지 않는다.
+       네이버플레이스에서 별점·리뷰 수를 옮겨 적고(약 3시간),
+       <code>params.json</code>의 출처 표시를 바꾸면 배너가 출처 표기로 바뀐다.
+       그 한 줄이 “진짜 데이터인가”의 유일한 스위치다.</p>
+  </div>
+
+  <h4>수집할 때 함께 만족시켜야 하는 두 조건</h4>
+  <ul>
+    <li>6분류가 <strong>각각 4곳 이상</strong> — 카페·쉼터를 보강하고 역사문화에서 덜어낸다</li>
+    <li><strong>리뷰 10개 미만 · 별점 4.7 이상</strong>인 곳 4곳 이상,
+        <strong>리뷰 1,000개 이상</strong>인 곳 4곳 이상 — 없으면 순위 뒤집힘이 나오지 않아
+        발표에서 설명할 것이 사라진다</li>
+  </ul>
+</section>
+
+<footer>
+  맵으로 공주 · 개발기획안 v2.1 · Python 3.13 · Flask · SQLite · Leaflet<br>
+  장소 데이터 출처 네이버플레이스 — 교육 목적 내부 실습 한정, 재배포 금지.
+</footer>
+
+</div>
+</body>
+</html>

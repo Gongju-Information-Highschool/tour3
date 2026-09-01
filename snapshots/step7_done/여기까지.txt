@@ -1,0 +1,6 @@
+step7_done
+9차시까지: 동선 · 보정 전/후 통계 (완성본)
+
+막힌 지점부터 이어가려면 이 폴더를 통째로 복사해서 쓰세요.
+  python scripts/init_db.py
+  python app.py

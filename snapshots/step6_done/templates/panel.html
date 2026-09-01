@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}{{ place.name }} · 맵으로 공주{% endblock %}
+
+{% block body %}
+
+<div class="card">
+  <h2>{{ place.name }}</h2>
+  <p class="note">
+    {{ place.category }} · 네이버 원문 분류 "{{ place.category_raw }}" · {{ place.road_address }}
+  </p>
+
+  {# ── 별점과 보정 별점을 나란히 놓는다. 이 화면의 핵심이다 ─────── #}
+  <table>
+    <tr>
+      <th>네이버 별점</th>
+      <td class="num">
+        {% if place.star is none %}
+          <span class="note">없음 (리뷰가 적어 별점이 아직 없는 곳)</span>
+        {% else %}
+          {{ '%.1f'|format(place.star) }}
+        {% endif %}
+      </td>
+    </tr>
+    <tr>
+      <th>보정 별점</th>
+      <td class="num"><b>{{ '%.3f'|format(place.adj_star) }}</b></td>
+    </tr>
+    <tr>
+      <th>방문자 리뷰</th>
+      <td class="num">{{ '{:,}'.format(place.visitor_rev) }}개</td>
+    </tr>
+    <tr>
+      <th>블로그 리뷰</th>
+      <td class="num">{{ '{:,}'.format(place.blog_rev) }}개</td>
+    </tr>
+    <tr>
+      <th>별점 점수 (0~1로 편 값)</th>
+      <td class="num">{{ '%.3f'|format(place.s_star) }}</td>
+    </tr>
+  </table>
+
+  {# ── 이 장소에서 실제로 무슨 계산이 일어났는지 보여 준다 ──────── #}
+  <p class="note" style="margin-top:12px">
+    보정 별점 =
+    ({{ place.visitor_rev }} ×
+    {% if place.star is none %}{{ meta.c_mean }}{% else %}{{ '%.1f'|format(place.star) }}{% endif %}
+    + {{ meta.m_review|int }} × {{ meta.c_mean }})
+    ÷ ({{ place.visitor_rev }} + {{ meta.m_review|int }})
+    = <b>{{ '%.3f'|format(place.adj_star) }}</b>
+    {% if place.star is none %}
+      <br>별점이 없어 R 자리에 전체 평균 {{ meta.c_mean }}을 넣었습니다.
+      그래서 결과가 정확히 {{ meta.c_mean }}이 됩니다 — 리뷰 수가 몇 개든 마찬가지입니다.
+    {% endif %}
+  </p>
+
+  <form method="post" action="{{ url_for('toggle_fav', place_id=place.id) }}"
+        style="margin-top:14px">
+    <input type="hidden" name="back" value="{{ url_for('panel', place_id=place.id) }}">
+    <button class="{{ 'ghost' if is_fav }}">
+      {{ '찜 취소' if is_fav else '♥ 찜하기' }}
+    </button>
+  </form>
+
+  <p class="note" style="margin-top:12px">
+    이 장소를 <b>거리 기준점</b>으로 삼았습니다.
+    <a href="{{ url_for('home') }}">지도로 돌아가면</a> 여기서 가까운 순서로 다시 줄 세웁니다.
+  </p>
+</div>
+
+{% endblock %}

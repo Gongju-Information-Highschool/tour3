@@ -1,0 +1,6 @@
+step4_done
+4차시(5-6차시)까지: 보정 별점 + 손계산 검증
+
+막힌 지점부터 이어가려면 이 폴더를 통째로 복사해서 쓰세요.
+  python scripts/init_db.py
+  python app.py

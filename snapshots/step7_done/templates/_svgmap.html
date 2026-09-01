@@ -1,0 +1,56 @@
+{# ═══════════════════════════════════════════════════════════════
+   _svgmap.html — 지도 API 없이 좌표만으로 그리는 위치 관계 그림
+
+   지도 타일에 닿지 않을 때 지도를 대신한다(§6.4).
+   정적 이미지 파일이 아니라 **지금 점수·필터가 반영된** 그림이다.
+   ═══════════════════════════════════════════════════════════════ #}
+
+{% macro scatter(points, origin_id=None, width=520, height=440) %}
+<svg class="svgmap" viewBox="0 0 {{ width }} {{ height }}" width="100%" role="img"
+     aria-label="공주 장소 위치 관계 그림">
+  {% for p in points %}
+    <circle cx="{{ p.x }}" cy="{{ p.y }}"
+            r="{{ 9 if p.size == 'big' else (6.5 if p.size == 'mid' else 4.5) }}"
+            fill="var(--c-{{ p.category }})"
+            fill-opacity="{{ 0.9 if p.size == 'big' else 0.65 }}"
+            stroke="{{ '#23201c' if p.id == origin_id else 'none' }}"
+            stroke-width="2"></circle>
+  {% endfor %}
+</svg>
+<p class="note">
+  진짜 지도가 아니라 좌표를 점으로 찍은 그림입니다. 겹치는 점은 조금 밀어 놓았습니다.
+  점 크기는 최종 점수 3단계, 색은 카테고리입니다.
+</p>
+{% endmacro %}
+
+
+{% macro numbered(points, width=520, height=440) %}
+<svg class="svgmap" viewBox="0 0 {{ width }} {{ height }}" width="100%" role="img"
+     aria-label="동선 순서 그림">
+  {# 방문 순서대로 선을 잇는다 #}
+  {% if points|length > 1 %}
+    <polyline points="{% for p in points %}{{ p.x }},{{ p.y }} {% endfor %}"
+              fill="none" stroke="var(--accent)" stroke-width="2"
+              stroke-dasharray="5 4"></polyline>
+  {% endif %}
+  {% for p in points %}
+    <circle cx="{{ p.x }}" cy="{{ p.y }}" r="14"
+            fill="var(--c-{{ p.category }})" fill-opacity="0.9"></circle>
+    <text x="{{ p.x }}" y="{{ p.y + 4 }}" text-anchor="middle"
+          fill="#ffffff" font-size="13" font-weight="700">{{ p.order }}</text>
+  {% endfor %}
+</svg>
+<p class="note">
+  이름표는 그리지 않았습니다 — 원도심 장소들은 서로 1km 안쪽이라 이름이 반드시 겹칩니다.
+  번호가 아래 목록과 1:1로 대응하므로 정보는 잃지 않습니다.
+</p>
+{% endmacro %}
+
+
+{% macro legend(counts=None) %}
+<div class="legend">
+  {% for cat in CATEGORIES %}
+    <span><i style="background: var(--c-{{ cat }})"></i>{{ cat }}{% if counts %} {{ counts[cat] }}{% endif %}</span>
+  {% endfor %}
+</div>
+{% endmacro %}

@@ -1,0 +1,164 @@
+/* ═══════════════════════════════════════════════════════════
+   style.css — 화면 전체의 유일한 CSS 파일 (§6.5)
+
+   색 규칙
+     · UI 기본색 3개 : 배경 / 글자 / 강조   ← 버튼·카드·헤더는 여기서만
+     · 카테고리 6색  : **지도 마커와 범례에만** 허용되는 예외
+                       (색이 곧 데이터인 유일한 자리)
+   ═══════════════════════════════════════════════════════════ */
+
+:root {
+  /* UI 기본색 3개 */
+  --bg: #f7f6f3;
+  --ink: #23201c;
+  --accent: #1f6f5c;
+
+  /* 위 3색에서 파생된 명암 (새로운 색이 아니다) */
+  --line: #dcd8d1;
+  --muted: #7c766d;
+  --card: #ffffff;
+
+  /* 카테고리 6색 — 지도 마커·범례 전용 */
+  --c-역사문화: #8b5e34;
+  --c-자연: #2f8f4e;
+  --c-체험: #d98324;
+  --c-먹거리: #c0392b;
+  --c-카페감성: #8e44ad;
+  --c-휴식: #2b6cb0;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Malgun Gothic", "맑은 고딕", system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+a { color: var(--accent); }
+
+/* ── 머리말 ────────────────────────────────────────────── */
+header {
+  background: var(--card);
+  border-bottom: 1px solid var(--line);
+  padding: 10px 18px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+header h1 { font-size: 18px; margin: 0; }
+header h1 a { text-decoration: none; color: var(--ink); }
+header nav { display: flex; gap: 14px; margin-left: auto; }
+header nav a { text-decoration: none; font-weight: 600; }
+
+/* ── 알림 배너 ─────────────────────────────────────────── */
+.banner {
+  padding: 9px 18px;
+  font-size: 13px;
+  border-bottom: 1px solid var(--line);
+  background: #fff8e8;
+}
+.banner.warn { background: #fdecea; }
+.banner b { color: var(--accent); }
+
+/* ── 본문 레이아웃 : 지도 70% / 랭킹 30% ───────────────── */
+main { padding: 16px 18px 40px; }
+
+.split { display: flex; gap: 18px; align-items: flex-start; }
+.split .map-side { flex: 0 0 68%; }
+.split .rank-side { flex: 1 1 30%; }
+
+@media (max-width: 860px) {          /* 모바일은 지도 위 / 목록 아래 1컬럼 */
+  .split { flex-direction: column; }
+  .split .map-side, .split .rank-side { flex: 1 1 auto; width: 100%; }
+}
+
+/* ── 카드 ──────────────────────────────────────────────── */
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 14px;
+}
+.card h2 { margin: 0 0 10px; font-size: 16px; }
+
+/* ── 필터 칩 ───────────────────────────────────────────── */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  display: inline-block;
+  padding: 5px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--card);
+  text-decoration: none;
+  color: var(--ink);
+  font-size: 13px;
+}
+.chip.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+.chip .n { color: var(--muted); font-size: 12px; }
+.chip.on .n { color: #dff0ea; }
+.chip.empty { opacity: .45; }
+
+/* ── 폼 ───────────────────────────────────────────────── */
+form.inline { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+label { font-size: 13px; color: var(--muted); }
+select, input[type="range"] { font-size: 13px; }
+button {
+  background: var(--accent);
+  color: #fff;
+  border: 0;
+  border-radius: 8px;
+  padding: 7px 14px;
+  font-size: 14px;
+  cursor: pointer;
+  font-family: inherit;
+}
+button.ghost { background: var(--card); color: var(--ink); border: 1px solid var(--line); }
+
+/* ── 랭킹 목록 ─────────────────────────────────────────── */
+ol.rank { list-style: none; margin: 0; padding: 0; }
+ol.rank li {
+  display: flex; gap: 10px; align-items: baseline;
+  padding: 7px 0; border-bottom: 1px solid var(--line);
+}
+ol.rank li:last-child { border-bottom: 0; }
+ol.rank .no { width: 22px; color: var(--muted); font-size: 13px; text-align: right; }
+ol.rank .nm { flex: 1; text-decoration: none; color: var(--ink); }
+ol.rank .sc { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+/* ── 표 ───────────────────────────────────────────────── */
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+th, td { padding: 6px 8px; border-bottom: 1px solid var(--line); text-align: left; }
+th { color: var(--muted); font-weight: 600; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+tr.flip { background: #fff8e8; }
+.up { color: var(--accent); font-weight: 700; }
+.down { color: #c0392b; font-weight: 700; }
+
+/* ── CSS 막대그래프 (차트 라이브러리 없음) ─────────────── */
+.bar { background: var(--line); border-radius: 4px; height: 12px; }
+.bar > span { display: block; height: 100%; background: var(--accent); border-radius: 4px; }
+
+/* ── 지도 ─────────────────────────────────────────────── */
+#map { height: 440px; border-radius: 10px; border: 1px solid var(--line); }
+.svgmap { background: var(--card); border: 1px solid var(--line); border-radius: 10px; }
+.svgmap text { font-size: 10px; fill: var(--muted); }
+
+.legend { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; font-size: 12px; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; }
+
+/* ── 뱃지 ─────────────────────────────────────────────── */
+.badge {
+  display: inline-block; font-size: 12px; padding: 2px 8px;
+  border-radius: 999px; border: 1px solid var(--line); color: var(--muted);
+}
+.badge.walk { border-color: var(--accent); color: var(--accent); }
+.badge.car { border-color: #c0392b; color: #c0392b; }
+
+.note { font-size: 12px; color: var(--muted); }
+.big-num { font-size: 22px; font-weight: 700; }

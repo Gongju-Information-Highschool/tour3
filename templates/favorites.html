@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}찜 목록 · 맵으로 공주{% endblock %}
+
+{% block body %}
+
+<div class="card">
+  <h2>찜한 곳 {{ places|length }}곳</h2>
+
+  {% if places %}
+    <table>
+      <tr><th>장소</th><th>분류</th><th class="num">보정 별점</th><th></th></tr>
+      {% for p in places %}
+        <tr>
+          <td><a href="{{ url_for('panel', place_id=p.id) }}">{{ p.name }}</a></td>
+          <td>{{ p.category }}</td>
+          <td class="num">{{ '%.3f'|format(p.adj_star) }}</td>
+          <td>
+            <form method="post" action="{{ url_for('toggle_fav', place_id=p.id) }}">
+              <input type="hidden" name="back" value="{{ url_for('favorites') }}">
+              <button class="ghost">찜 취소</button>
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+    </table>
+
+    <form class="inline" method="post" action="{{ url_for('make_route') }}"
+          style="margin-top:16px">
+      <button>동선 짜기</button>
+
+      {# ── 확장 3 (§13) — 비워 두면 나 혼자 동선이다 ───────────── #}
+      <label>짝꿍 코드</label>
+      <input type="text" name="merge" size="5" placeholder="선택">
+      <span class="note">내 코드 <b>{{ share_code }}</b> — 짝꿍에게 알려 주면 찜을 합쳐 줍니다</span>
+    </form>
+    {% if places|length < 2 %}
+      <p class="note">동선을 만들려면 두 곳 이상 찜해야 합니다.</p>
+    {% endif %}
+
+  {% else %}
+    <p>아직 찜한 곳이 없습니다.
+      <a href="{{ url_for('home') }}">지도</a>에서 마커를 눌러 마음에 드는 곳을 찜해 보세요.</p>
+  {% endif %}
+</div>
+
+{% endblock %}

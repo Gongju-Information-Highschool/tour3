@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}맵으로 공주{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  {% block head %}{% endblock %}
+</head>
+<body>
+
+<header>
+  <h1><a href="{{ url_for('home') }}">맵으로 공주</a></h1>
+  <nav>
+    {% for name, label in nav %}
+      <a href="{{ url_for(name) }}">{{ label }}</a>
+    {% endfor %}
+  </nav>
+</header>
+
+{# ── 데이터 출처 표기 (§14 네이버 데이터 이용 범위) ───────────────── #}
+{% if is_placeholder %}
+  <div class="banner warn">
+    <b>임시 데이터</b>로 돌고 있습니다 — 별점·리뷰수는 실제 네이버플레이스 값이 아닙니다.
+    장소명과 좌표만 실제입니다. (기획안 §8 A2 수집을 마치면 교체됩니다)
+  </div>
+{% else %}
+  <div class="banner">
+    출처: 네이버플레이스, {{ meta.collected_at }} 수집 스냅샷 ·
+    교육 목적 내부 실습용 (재배포 금지)
+  </div>
+{% endif %}
+
+{# ── 지도를 못 쓰는 상태면 알린다 (§6.4) ─────────────────────────── #}
+{% if MAP_MODE != 'leaflet' %}
+  <div class="banner">
+    <b>오프라인 모드</b> ·
+    {% if not HAS_LEAFLET %}static/leaflet/ 번들이 없어{% else %}지도 타일 서버에 닿지 않아{% endif %}
+    지도 대신 <b>좌표로 그린 위치 관계 그림</b>을 보여 줍니다. 점수·필터는 그대로 반영됩니다.
+  </div>
+{% endif %}
+
+<main>
+  {% block body %}{% endblock %}
+</main>
+
+</body>
+</html>

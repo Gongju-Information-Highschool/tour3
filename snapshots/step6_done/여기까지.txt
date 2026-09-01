@@ -1,0 +1,6 @@
+step6_done
+8차시까지: 상세 패널 · 찜 · 클릭 로그
+
+막힌 지점부터 이어가려면 이 폴더를 통째로 복사해서 쓰세요.
+  python scripts/init_db.py
+  python app.py

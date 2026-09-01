@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% import "_svgmap.html" as svgmap with context %}
+{% block title %}위치 관계 그림 · 맵으로 공주{% endblock %}
+
+{% block body %}
+
+<div class="card">
+  <h2>인터넷 없이 보는 위치 관계</h2>
+  <p class="note">
+    지도 타일 서버에 닿지 않아도 이 화면은 그대로 나옵니다.
+    좌표를 그림 위의 점으로 바꿔 찍은 것뿐이라 외부 서비스가 전혀 필요 없습니다.
+    <b>점 크기는 최종 점수, 색은 카테고리</b>이며 지금 기준점은
+    <b>{{ origin.name if origin }}</b> 입니다.
+  </p>
+</div>
+
+<div class="split">
+  <div class="map-side">
+    {{ svgmap.scatter(svg_points, origin.id if origin) }}
+    {{ svgmap.legend() }}
+  </div>
+
+  <div class="rank-side">
+    <div class="card">
+      <h2>점수 순서</h2>
+      <ol class="rank">
+        {% for p in places %}
+          <li>
+            <span class="no">{{ p.rank }}</span>
+            {% if 'panel' in endpoints %}
+              <a class="nm" href="{{ url_for('panel', place_id=p.id) }}">{{ p.name }}</a>
+            {% else %}<span class="nm">{{ p.name }}</span>{% endif %}
+            <span class="sc">{{ '%.3f'|format(p.final) }}</span>
+          </li>
+        {% endfor %}
+      </ol>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

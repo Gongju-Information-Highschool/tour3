@@ -1,0 +1,18 @@
+{
+  "_주의": "이 파일이 m·C·손계산 예제의 단일 출처다. scoring.py·verify.py·교재가 모두 여기를 읽는다.",
+
+  "m_review": 30,
+  "c_mean": 4.30,
+
+  "hand_calc": {
+    "cafe":   {"name": "곡물집",        "v": 2,   "R": 5.0, "expect": 4.34},
+    "bakery": {"name": "베이커리밤마을", "v": 312, "R": 4.4, "expect": 4.39}
+  },
+
+  "weights": {"star": 0.5, "dist": 0.3, "pref": 0.2},
+
+  "collected_at": "2026-08",
+
+  "data_source": "placeholder",
+  "_data_source_설명": "placeholder = 별점·리뷰수가 임시값. 좌표·장소명만 실제. A2(네이버플레이스 수집) 완료 후 'naver_place'로 바꾼다."
+}

@@ -1,0 +1,6 @@
+step5_done
+7차시까지: 정규화·거리·취향 부스트·최종 점수 랭킹
+
+막힌 지점부터 이어가려면 이 폴더를 통째로 복사해서 쓰세요.
+  python scripts/init_db.py
+  python app.py
